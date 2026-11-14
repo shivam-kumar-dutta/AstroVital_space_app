@@ -2,8 +2,8 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { validateEntry, validateState } = require('./modules/dataValidator');
-const { evaluateEntry, buildReport } = require('./modules/healthEngine');
+const { validateEntry, validateState } = require('./dataValidator');
+const { evaluateEntry, buildReport } = require('./healthEngine');
 
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, 'data');
