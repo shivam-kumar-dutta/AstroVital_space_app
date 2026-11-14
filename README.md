@@ -1,74 +1,61 @@
-AstroVitals is a NASA Space Apps hackathon prototype for recording crew health readings and reviewing simple trends. It includes the browser dashboard and a small Node.js REST API with input validation and JSON-file storage.
-
-## Run it
-
-1. Install Node.js 18 or newer on your computer.
-2. Open a terminal in this `astrovitals` folder.
-3. Run `npm start`.
-4. Open `http://localhost:3000` in your browser.
-
-On Windows, you can also double-click `start-astrovitals.bat`; it opens the server window for you. Keep that window open while using the app. Open the URL in a regular browser on the same computer.
-
-There are no third-party Node packages to install. The first run creates `data/state.json` when a reading is saved. That file is intentionally excluded from the shareable source project so personal/demo readings are not accidentally shared.
-
-To share with teammates, send the project folder or ZIP. Each teammate can run their own local copy. The server listens on this computer's localhost address; it is not a hosted multi-user service.
-
-## What is included
-
-- `index.html`, `style.css`, `script.js`: dashboard, forms, and browser-side interaction.
-- `server.js`: serves the page and provides REST API routes.
-- `modules/dataValidator.js`: checks JSON shape, field types, allowed ranges, duplicate days, and blood-pressure relationships.
-- `modules/healthEngine.js`: calculates reference-range status, personal baselines, simple trends, alerts, and report data.
-- `data/state.json`: created on this computer at runtime; not included in the shared source package.
-
-## Validation rules
-
-- A crew member needs a non-empty ID and name. IDs must be unique.
-- Mission day must be a whole number, at least 1, and unique for that crew member.
-- A reading may omit a measurement or use `null` when it is unavailable. If supplied, a measurement must be a finite number within its configured input bounds.
-- Stress must be a whole number from 1 to 10.
-- When both blood-pressure values are present, systolic must be higher than diastolic.
-- Unsupported reading fields and malformed JSON are rejected with a list of field-specific errors.
-- Saving a second reading for the same crew member and day replaces that day's reading, matching the dashboard behavior.
-
-The numeric input bounds and alert thresholds are demo configuration in `modules/dataValidator.js` and `modules/healthEngine.js`. They are not validated medical criteria. This project is a decision-support demonstration, not a diagnostic or treatment tool.
-
-## API routes
-
-All routes use JSON.
-
-| Method | Route | Purpose |
-|---|---|---|
-| `GET` | `/api/state` | Read the complete saved crew state |
-| `PUT` | `/api/state` | Validate and replace the complete crew state |
-| `GET` | `/api/crew` | List crew members and record counts |
-| `POST` | `/api/crew` | Add a crew member with `{ "name": "...", "role": "..." }` |
-| `DELETE` | `/api/crew/:id` | Remove a crew member and their readings |
-| `GET` | `/api/crew/:id/history` | Read that crew member's readings by mission day |
-| `POST` | `/api/crew/:id/readings` | Validate and save or replace one day's reading |
-| `GET` | `/api/crew/:id/health?day=14` | Evaluate a selected day; omit `day` for the latest reading |
-| `GET` | `/api/crew/:id/report` | Return latest status, metric trends, and alert history |
-
-Example reading body:
-
-```json
-{
-  "day": 1,
-  "hr": 62,
-  "spo2": 97.6,
-  "sys": 118,
-  "dia": 76,
-  "rr": 15,
-  "temp": 36.6,
-  "sleep": 7.1,
-  "stress": 3,
-  "ex": 125,
-  "water": 2.6,
-  "rad": 680
-}
-```
-
-## Current boundaries
-
-This is a hackathon prototype. It has no sign-in, encryption, remote database, or multi-user synchronization. The JSON file is stored on the computer running the server. Do not enter real or identifiable medical records. For a deployed team demo, the team would need to choose and configure a shared host and secure storage.
 # AstroVitals
+
+AstroVitals is a NASA Space Apps hackathon prototype for recording astronaut crew health readings, checking input data, and reviewing trends and simple rule-based alerts. It is a demonstration and decision-support concept, not a medical diagnostic or treatment tool.
+
+## Run the local demo
+
+1. Install Node.js 18 or newer.
+2. Open a terminal in the project folder.
+3. Run `npm start`.
+4. Open [http://localhost:3000](http://localhost:3000) in a browser on the same computer.
+
+On Windows, you can double-click `start-astrovitals.bat` instead. Keep the server window open while using the app.
+
+The local server uses Node.js built-in modules; there are no third-party Node packages to install. It saves readings in `data/state.json` when data is saved. This file is created at runtime and excluded from the repository.
+
+## Public demo
+
+[Open AstroVitals on GitHub Pages](https://shivam-kumar-dutta.github.io/AstroVital_space_app/)
+
+The hosted version is a static demo. It stores visitor-entered demo data in that visitor's browser storage. The local Node.js server and its JSON-file persistence are not running on GitHub Pages.
+
+## Features
+
+- Add crew members and log daily readings for heart rate, blood oxygen, blood pressure, breathing rate, temperature, sleep, stress, exercise, fluids, and radiation.
+- Validate JSON structure, supported fields, finite numbers, configured input ranges, mission-day uniqueness, and blood-pressure consistency.
+- View status, simple alerts, personal-baseline comparisons, trends, and reading history.
+- Export readings as CSV.
+- View a separate panel with NASA ISS radiation telemetry.
+- Draw trend graphs as SVG with the app's JavaScript; no charting library is used.
+
+## Project files
+
+- `index.html`, `style.css`, `script.js`: browser dashboard and interactions.
+- `server.js`: local web server and JSON API.
+- `dataValidator.js`: validates crew state and daily readings.
+- `healthEngine.js`: calculates prototype status, trends, and reports.
+- `data/nasa-iss-radiation.json`: NASA ISS environmental radiation sample.
+- `.github/workflows/pages.yml`: publishes the static demo to GitHub Pages.
+- `start-astrovitals.bat`: Windows launcher.
+
+## NASA data and attribution
+
+The included JSON file contains 12 ISS DosTel absorbed-dose-rate measurements accessed through NASA Open Science Data Repository (OSDR) RadLab. The sample covers 2022-04-01 23:00 UTC to 2022-04-02 01:05 UTC and uses microgray per hour (µGy/hour).
+
+These are environmental radiation measurements, not individual astronaut vital signs. The dashboard presents them separately; they are not used in the crew health score. NASA describes RadLab data as preliminary.
+
+Suggested attribution: “Data are courtesy of the NASA Open Science Data Repository. ISS radiation telemetry accessed through NASA OSDR RadLab.”
+
+- [NASA OSDR RadLab data API](https://visualization.osdr.nasa.gov/radlab/gui/data-api/)
+- [NASA OSDR repository](https://osdr.nasa.gov/bio/repo)
+- [NASA OSDR citation guidance](https://science.nasa.gov/reference/osdr-faq/)
+
+## AI and other credits
+
+OpenAI Codex assisted with code organization and refactoring, implementation, debugging, NASA data integration, and documentation. The team is responsible for reviewing, understanding, and presenting the submitted project.
+
+The interface fonts Inter, JetBrains Mono, and Space Grotesk are loaded from [Google Fonts](https://fonts.google.com/).
+
+## Limitations and data safety
+
+The crew examples are synthetic. Validation bounds, readiness scores, and alert thresholds are prototype settings, not clinical standards. AstroVitals does not diagnose or prescribe. The app has no sign-in, encryption, hosted database, or multi-user synchronization. Do not enter real or identifiable medical records.
